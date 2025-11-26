@@ -45,7 +45,7 @@ This project implements a full Fake Headline Rewriter Pipeline that analyzes new
  
  fakeheadline-rewriter
 │
-├──  script.py                     # Main pipeline code
+├──  stage12345.py                     # Main pipeline code
 ├──  README.md                     # Documentation
 ├──  requirements.txt              # Dependencies
 │
