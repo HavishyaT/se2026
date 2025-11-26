@@ -35,7 +35,7 @@ class Complete5StagePipeline:
     """Integrated pipeline with all 5 stages"""
     
     def __init__(self):
-        # Stage 1 components
+       
         self.stopwords = {
             'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 
             'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself',
@@ -50,7 +50,7 @@ class Complete5StagePipeline:
             'further', 'then', 'once'
         }
         
-        # Stage 2 components
+     
         self.sensational_words = {
             'shocking': 4, 'unbelievable': 4, 'incredible': 3, 'outrageous': 4,
             'devastating': 4, 'horrifying': 5, 'terrifying': 5, 'explosive': 4,
@@ -71,7 +71,7 @@ class Complete5StagePipeline:
             'published': 3, 'professor': 3, 'expert': 3, 'official': 3
         }
         
-        # Stage 3 components
+
         self.entity_patterns = {
             'person': r'\b[A-Z][a-z]+ [A-Z][a-z]+\b',
             'date': r'\b(?:\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4})\b',
@@ -98,7 +98,7 @@ class Complete5StagePipeline:
             'covid-19 is real': {'verified': True, 'confidence': 100},
         }
         
-        # Stage 4 components - Headline templates
+
         self.headline_templates = {
             'neutral': [
                 'Reports indicate: {entity} {action}',
@@ -130,7 +130,6 @@ class Complete5StagePipeline:
             'establishes record', 'implements changes', 'reports progress'
         ]
         
-        # Stage 5 components - Annotation labels and confidence ranges
         self.annotation_labels = {
             'credibility': {
                 (0, 30): ' LOW CREDIBILITY',
@@ -160,7 +159,7 @@ class Complete5StagePipeline:
     
     def select_file_from_args(self):
         """Get file from command line or dialog"""
-        # First, try command line argument
+        
         if len(sys.argv) > 1:
             file_path = sys.argv[1]
             if os.path.exists(file_path):
@@ -169,7 +168,6 @@ class Complete5StagePipeline:
                 print(f" File not found: {file_path}")
                 return None
         
-        # If no command line arg, try file dialog (if tkinter available)
         if TKINTER_AVAILABLE:
             try:
                 root = tk.Tk()
@@ -183,7 +181,6 @@ class Complete5StagePipeline:
             except Exception as e:
                 print(f" File dialog error: {e}")
         
-        # If tkinter not available or dialog failed, ask for manual input
         print("\n Please enter the CSV file path:")
         file_path = input("File path: ").strip().strip('"').strip("'")
         
@@ -228,11 +225,7 @@ class Complete5StagePipeline:
         
         print(" No text column found!")
         return False
-    
-    # ========================================================================
-    # STAGE 1: PREPROCESSING
-    # ========================================================================
-    
+        
     def preprocess_text(self, text):
         """Preprocess single text"""
         if not text or not isinstance(text, str):
@@ -271,9 +264,6 @@ class Complete5StagePipeline:
         
         return True
     
-    # ========================================================================
-    # STAGE 2: FAKE/BIAS DETECTION
-    # ========================================================================
     
     def calculate_sensationalism(self, text):
         """Calculate sensationalism score"""
@@ -357,10 +347,6 @@ class Complete5StagePipeline:
         print(f"\n High fake probability (>70%): {high_fake:,} ({high_fake/len(self.df)*100:.1f}%)")
         
         return True
-    
-    # ========================================================================
-    # STAGE 3: FACT VERIFICATION
-    # ========================================================================
     
     def extract_entities(self, text):
         """Extract entities"""
@@ -518,10 +504,6 @@ class Complete5StagePipeline:
         
         return True
     
-    # ========================================================================
-    # STAGE 4: HEADLINE REWRITING
-    # ========================================================================
-    
     def get_main_entity(self, entities):
         """Extract primary entity from entities dict"""
         if not entities or not isinstance(entities, dict):
@@ -638,10 +620,6 @@ class Complete5StagePipeline:
         
         return True
     
-    # ========================================================================
-    # STAGE 5: OUTPUT GENERATION
-    # ========================================================================
-    
     def get_annotation_label(self, category, score):
         """Get annotation label based on score"""
         if not category in self.annotation_labels:
@@ -651,7 +629,6 @@ class Complete5StagePipeline:
             if score_range[0] <= score <= score_range[1]:
                 return label
         
-        # If score is out of range, return the highest or lowest label
         if score >= 100:
             return list(self.annotation_labels[category].values())[-1]
         else:
@@ -708,22 +685,18 @@ class Complete5StagePipeline:
         
         print(f"\n Generating final outputs for {len(self.df):,} records...")
         
-        # Generate credibility annotations
         self.df['credibility_annotation'] = self.df['verifiability_score'].apply(
             lambda x: self.get_annotation_label('credibility', x)
         )
-        
-        # Generate bias annotations
+
         self.df['bias_annotation'] = self.df['bias_score'].apply(
             lambda x: self.get_annotation_label('bias', x)
         )
         
-        # Generate fake risk annotations
         self.df['fake_risk_annotation'] = self.df['fake_probability'].apply(
             lambda x: self.get_annotation_label('fake_risk', x)
         )
-        
-        # Calculate overall confidence
+
         self.df['overall_confidence'] = self.df.apply(
             lambda row: self.calculate_overall_confidence(
                 row['verifiability_score'],
@@ -731,11 +704,9 @@ class Complete5StagePipeline:
                 row['bias_score']
             ), axis=1
         )
-        
-        # Generate source references
+     
         self.df['source_references'] = self.df['sources'].apply(self.generate_source_references)
-        
-        # Generate warning flags
+  
         self.df['warning_flags'] = self.df.apply(
             lambda row: self.generate_warning_flags(
                 row['fake_probability'],
@@ -743,8 +714,7 @@ class Complete5StagePipeline:
                 row['bias_score']
             ), axis=1
         )
-        
-        # Create final annotated headline with all metadata
+      
         self.df['final_headline_with_annotations'] = self.df.apply(
             lambda row: (
                 f"{row['rewritten_headline']}\n"
@@ -756,8 +726,6 @@ class Complete5StagePipeline:
                 f"└─ Warnings: {row['warning_flags']}"
             ), axis=1
         )
-        
-        # Generate quality tier classification
         self.df['quality_tier'] = pd.cut(
             self.df['overall_confidence'],
             bins=[0, 40, 60, 80, 100],
@@ -770,10 +738,6 @@ class Complete5StagePipeline:
         print(f"\n Excellent quality outputs: {excellent_count:,} ({excellent_count/len(self.df)*100:.1f}%)")
         
         return True
-    
-    # ========================================================================
-    # EXECUTION & RESULTS
-    # ========================================================================
     
     def print_summary(self):
         """Print comprehensive summary"""
@@ -810,8 +774,7 @@ class Complete5StagePipeline:
         print(f"  Quality tier distribution:")
         for tier, count in self.df['quality_tier'].value_counts().items():
             print(f"    {tier}: {count:,} ({count/len(self.df)*100:.1f}%)")
-        
-        # Show sample
+ 
         print("\n" + "="*70)
         print("SAMPLE RESULT (First Record)")
         print("="*70)
@@ -837,8 +800,7 @@ class Complete5StagePipeline:
         print(f"\n Saving to: {filename}")
         
         save_df = self.df.copy()
-        
-        # Convert complex columns to strings
+
         for col in ['entities', 'claims', 'kb_matches', 'sources', 'headline_candidates']:
             if col in save_df.columns:
                 save_df[col] = save_df[col].astype(str)
@@ -846,8 +808,7 @@ class Complete5StagePipeline:
         save_df.to_csv(filename, index=False)
         print(f" Saved successfully!")
         print(f" Location: {os.path.abspath(filename)}")
-        
-        # Also save a simplified human-readable version
+      
         hr_filename = filename.replace('.csv', '_readable.csv')
         readable_cols = [
             'original_text', 'rewritten_headline', 'credibility_annotation',
@@ -901,10 +862,6 @@ class Complete5StagePipeline:
         return True
 
 
-# ============================================================================
-# MAIN EXECUTION
-# ============================================================================
-
 def main():
     pipeline = Complete5StagePipeline()
     pipeline.run_complete_pipeline()
@@ -918,4 +875,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n\n Error: {e}")
         import traceback
+
         traceback.print_exc()
