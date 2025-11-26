@@ -48,10 +48,9 @@ This project implements a full Fake Headline Rewriter Pipeline that analyzes new
 ├──  script.py                     # Main pipeline code
 ├──  README.md                     # Documentation
 ├──  requirements.txt              # Dependencies
-├──  .gitignore                    # Ignored files
 │
 ├──  sample_data/                  # Sample input dataset
-│   └── sample_input.csv
+│   └── fake.csv.gz
 │
 └──  outputs/                      # Generated results
     ├── complete_5stage_analysis.csv
